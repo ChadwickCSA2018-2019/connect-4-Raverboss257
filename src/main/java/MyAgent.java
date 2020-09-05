@@ -1,7 +1,7 @@
 import java.util.Random;
 /**
  * Describe your basic strategy here.
- * @author <your Github username>
+ * @author <RyBry>
  *
  */
 public class MyAgent extends Agent {
@@ -41,7 +41,18 @@ public class MyAgent extends Agent {
    *
    */
   public void move() {
-
+	 int checkWin = iCanWin();
+	 int checkLoose = theyCanWin();
+	 //Check if they can win
+	 if (checkLoose != -1) 
+	 {
+		 moveOnColumn(checkLoose);
+	 }
+	 else if (checkWin != -1) 
+	 {
+		 moveOnColumn(checkWin);
+	 }
+	 else moveOnColumn(randomMove());
   }
 
   /**
@@ -108,8 +119,42 @@ public class MyAgent extends Agent {
    *
    * @return the column that would allow the agent to win.
    */
+  
+  //Determine myAgent color. Check a column. If there is a matching colored tile at the top of the column, place another one in the row above it.
   public int iCanWin() {
-    return 0;
+	  //If i'm red, win for red
+	  if(iAmRed)
+	  {
+		  System.out.println("I'm red!");
+		  
+		  //Win Vertically
+		  for (int j = 0; j < myGame.getColumnCount(); j++) 
+		  {
+			  System.out.println("Checking Column: " + j);
+			 //Find the lowest empty index for column j
+			 int k = getLowestEmptyIndex(myGame.getColumn(j));
+			 System.out.println("Lowest index: " + k);
+			 Connect4Slot curSlot = myGame.getColumn(j).getSlot(k + 1);
+			 
+			 //Make sure current row doesn't exceed game boundaries
+			 if(k != myGame.getRowCount() - 1 && k >= 0)
+			 if(curSlot.getIsFilled())
+			 {
+				  //System.out.println("Slot: " + (k -1) + " Is filled! ");
+				//Is the slot filled with the same color, return the column number
+				if(curSlot.getIsRed()) 
+				{
+					System.out.println("Slot: " + (k) + " Is Red!");
+					System.out.println("***********************");
+					return j;
+				}
+			 } 
+		  }
+	  }
+		System.out.println("No strategic move, choosing random");
+    return -1;
+    //TODO Fix issue where red will not try other column
+    //TODO diagonal checking
   }
 
   /**
@@ -122,7 +167,30 @@ public class MyAgent extends Agent {
    * @return the column that would allow the opponent to win.
    */
   public int theyCanWin() {
-    return 0;
+	  //If I'm red, block yellows
+	  if(iAmRed) 
+	  {
+		  
+		//Win Vertically
+		  for (int j = 0; j < myGame.getColumnCount(); j++) 
+		  {
+			  int k = getLowestEmptyIndex(myGame.getColumn(j));
+				 //System.out.println("Lowest index: " + k);
+				 Connect4Slot curSlot = myGame.getColumn(j).getSlot(k + 1);
+				 //Check if curSlot is within game boundaries and is worth checking (3 above bottom)
+				 if(k <= myGame.getColumnCount()- 5 && k >= 0)
+					 if(curSlot.getIsFilled())
+					 {
+						//If 3 vertical slots in a row aren't red, take priority and place a red one on top 
+						 if(!curSlot.getIsRed() && !myGame.getColumn(j).getSlot(k + 2).getIsRed() && !myGame.getColumn(j).getSlot(k + 3).getIsRed()) 
+						 {
+							 System.out.println("Blocked Opponent");
+							 return j;
+						 }
+					 }
+		  }
+	  }
+    return -1;
   }
 
   /**

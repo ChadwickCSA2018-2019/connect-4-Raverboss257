@@ -22,7 +22,7 @@ public class Main {
         // create the game; these sizes can be altered for larger or smaller games
         Connect4Game game = new Connect4Game(7, 6);
         // create the red player, any subclass of Agent
-        Agent redPlayer = new RandomAgent(game, true);
+        Agent redPlayer = new MyAgent(game, true);
         // create the yellow player, any subclass of Agent
         Agent yellowPlayer = new BeginnerAgent(game, false);
         // create the game window
