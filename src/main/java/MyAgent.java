@@ -52,6 +52,11 @@ public class MyAgent extends Agent {
 	 {
 		 moveOnColumn(checkWin);
 	 }
+	 else if(!myGame.getColumn(3).getIsFull()) 
+	 {
+		 moveOnColumn(3);
+		 System.out.println("Going for the Middle");
+	 }
 	 else moveOnColumn(randomMove());
   }
 
@@ -125,15 +130,15 @@ public class MyAgent extends Agent {
 	  //If i'm red, win for red
 	  if(iAmRed)
 	  {
-		  System.out.println("I'm red!");
+		//  System.out.println("I'm red!");
 		  
 		  //Win Vertically
 		  for (int j = 0; j < myGame.getColumnCount(); j++) 
 		  {
-			  System.out.println("Checking Column: " + j);
+			//  System.out.println("Checking Column: " + j);
 			 //Find the lowest empty index for column j
 			 int k = getLowestEmptyIndex(myGame.getColumn(j));
-			 System.out.println("Lowest index: " + k);
+		//	 System.out.println("Lowest index: " + k);
 			 Connect4Slot curSlot = myGame.getColumn(j).getSlot(k + 1);
 			 
 			 //Make sure current row doesn't exceed game boundaries
@@ -144,17 +149,16 @@ public class MyAgent extends Agent {
 				//Is the slot filled with the same color, return the column number
 				if(curSlot.getIsRed()) 
 				{
-					System.out.println("Slot: " + (k) + " Is Red!");
-					System.out.println("***********************");
+				//	System.out.println("Slot: " + (k) + " Is Red!");
+				//	System.out.println("***********************");
 					return j;
 				}
 			 } 
 		  }
 	  }
-		System.out.println("No strategic move, choosing random");
+	//	System.out.println("No strategic move, choosing random");
     return -1;
-    //TODO Fix issue where red will not try other column
-    //TODO diagonal checking
+    //TODO Play to win horizontally & Diagonally
   }
 
   /**
@@ -166,31 +170,137 @@ public class MyAgent extends Agent {
    *
    * @return the column that would allow the opponent to win.
    */
-  public int theyCanWin() {
-	  //If I'm red, block yellows
-	  if(iAmRed) 
-	  {
+  public int theyCanWin() { 
 		  
-		//Win Vertically
-		  for (int j = 0; j < myGame.getColumnCount(); j++) 
+		  //Check all columns and their rows for a yellow
+		  for(int j = 0; j < myGame.getColumnCount(); j++) 
 		  {
-			  int k = getLowestEmptyIndex(myGame.getColumn(j));
-				 //System.out.println("Lowest index: " + k);
-				 Connect4Slot curSlot = myGame.getColumn(j).getSlot(k + 1);
-				 //Check if curSlot is within game boundaries and is worth checking (3 above bottom)
-				 if(k <= myGame.getColumnCount()- 5 && k >= 0)
-					 if(curSlot.getIsFilled())
+			  for(int k = 0; k < myGame.getColumn(j).getRowCount(); k++) 
+			  {
+				  Connect4Slot curSlot = myGame.getColumn(j).getSlot(k);
+				  //If a yellow is found, run the checks
+				  if(curSlot.getIsFilled() && !curSlot.getIsRed()) 
+				  {
+					//Check to see if a strategic column was chosen (!= -1)
+					 int valReturn = verticalBlock(j);
+					 if(valReturn != -1) 
+					 {return valReturn;}
+					  
+					 valReturn = rightDiagonal(j,k);
+					 if(valReturn != -1) 
+					 {return valReturn;}
+					 
+					 valReturn = leftDiagonal(j,k);
+					 if(valReturn != -1) 
+					 {return valReturn;}
+					 
+					 valReturn = rightHorizontal(j, k);
+					 if(valReturn != -1)
+					 {return valReturn;}
+					 
+					 valReturn = leftHorizontal(j, k);
+					 if(valReturn != -1) 
+					 {return valReturn;}
+				  }
+			  }
+		  }
+    return -1;
+  }
+  
+  private int verticalBlock(int j) {
+	  
+		  int k = getLowestEmptyIndex(myGame.getColumn(j));
+			 //System.out.println("Lowest index: " + k);
+			 Connect4Slot curSlot = myGame.getColumn(j).getSlot(k + 1);
+			 //Check if curSlot is within game boundaries and is worth checking (3 above bottom)
+			 if(k <= myGame.getColumnCount()- 5 && k >= 0)
+				 if(curSlot.getIsFilled())
+				 {
+					//If 3 vertical slots in a row aren't red, take priority and place a red one on top 
+					 if(!curSlot.getIsRed() && !myGame.getColumn(j).getSlot(k + 2).getIsRed() && !myGame.getColumn(j).getSlot(k + 3).getIsRed()) 
 					 {
-						//If 3 vertical slots in a row aren't red, take priority and place a red one on top 
-						 if(!curSlot.getIsRed() && !myGame.getColumn(j).getSlot(k + 2).getIsRed() && !myGame.getColumn(j).getSlot(k + 3).getIsRed()) 
-						 {
-							 System.out.println("Blocked Opponent");
-							 return j;
-						 }
+						 System.out.println("Vertical Block");
+						 return j;
 					 }
+			 }
+	  
+	  return -1;
+  }
+  
+  private int rightDiagonal(int j, int k)
+  {
+	  //Check restrictions first
+	  if(j <= myGame.getColumnCount() - 4 && k >= 3)
+	  {
+		  //If the one to the right column and up a row is filled & not red...
+		  if(myGame.getColumn(j + 1).getSlot(k - 1).getIsFilled() && !myGame.getColumn(j + 1).getSlot(k - 1).getIsRed()) 
+		  {
+			 //If the next column over and a row up is empty, but there is a tile below it, place a tile on-top!
+				 if(!myGame.getColumn(j + 2).getSlot(k - 2).getIsFilled() && myGame.getColumn(j + 2).getSlot(k - 1).getIsFilled()) 
+				 {
+					  System.out.println("Diagonal Block ----> ");
+					  return (j + 2);
+				 }
 		  }
 	  }
-    return -1;
+	  return -1;
+  }
+  
+  private int leftDiagonal(int j, int k) 
+  {
+	  //Check restrictions first
+	  if(j >= 3 && k >= 3)
+	  {
+		  //If the one to the left column and up a row is filled & not red...
+		  if(myGame.getColumn(j - 1).getSlot(k - 1).getIsFilled() && !myGame.getColumn(j - 1).getSlot(k - 1).getIsRed()) 
+		  {
+			 //If the next column over and a row up is empty, but there is a tile below it, place a tile on-top!
+				 if(!myGame.getColumn(j - 2).getSlot(k - 2).getIsFilled() && myGame.getColumn(j - 2).getSlot(k - 1).getIsFilled()) 
+				 {
+					  System.out.println("Diagonal Block <----");
+					  return (j - 2);
+				 }
+		  }
+	  }
+	  return -1;
+  }
+  
+  private int rightHorizontal(int j, int k) 
+  {
+	  //Check restrictions first
+	  if(j <= myGame.getColumnCount() - 4) 
+	  {
+		  //If the one to the right of the column is filled & not red
+		  if(myGame.getColumn(j + 1).getSlot(k).getIsFilled() && !myGame.getColumn(j + 1).getSlot(k).getIsRed()) 
+		  {
+			  //If there is an empty slot to the right of the previous, go there!
+			  if(!myGame.getColumn(j + 2).getSlot(k).getIsFilled()) 
+			  {
+				  System.out.println("Horizontal Block ---->");
+				  return (j+2);
+			  }
+		  }
+	  }
+	  return -1;
+  }
+  
+  private int leftHorizontal(int j, int k)
+  {
+	  //Check restrictions first
+	  if(j >= 3) 
+	  {
+		  //If the one to the left of the column is filled & not red
+		  if(myGame.getColumn(j - 1).getSlot(k).getIsFilled() && !myGame.getColumn(j - 1).getSlot(k).getIsRed()) 
+		  {
+			  //If there is an empty slot to the left of the previous, go there!
+			  if(!myGame.getColumn(j - 2).getSlot(k).getIsFilled()) 
+			  {
+				  System.out.println("Horizontal Block <----");
+				  return (j-2);
+			  }
+		  }
+	  }
+	  return -1;
   }
 
   /**
