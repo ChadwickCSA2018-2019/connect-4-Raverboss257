@@ -171,9 +171,9 @@ public class MyAgent extends Agent {
 		  {
 			  for(int k = 0; k < myGame.getColumn(j).getRowCount(); k++) 
 			  {
-				  Connect4Slot curSlot = myGame.getColumn(j).getSlot(k);
+				  Connect4Slot initSlot = myGame.getColumn(j).getSlot(k);
 				  //If an opposite tile is found, run the checks
-				  if(curSlot.getIsFilled() && curSlot.getIsRed() != iAmRed) 
+				  if(initSlot.getIsFilled() && initSlot.getIsRed() != iAmRed) 
 				  {
 					//Check to see if a strategic column was chosen (!= -1)
 					 int valReturn = verticalBlock(j);
@@ -224,6 +224,7 @@ public class MyAgent extends Agent {
 		  //Check restrictions first
 		  if(j <= myGame.getColumnCount() - 4 && k >= 3)
 		  {
+			  //**2 Pattern Block**
 			  //If the one to the right column and up a row is filled & not equal to myAgent color...
 			  if(myGame.getColumn(j + 1).getSlot(k - 1).getIsFilled() && myGame.getColumn(j + 1).getSlot(k - 1).getIsRed() != iAmRed) 
 			  {
@@ -232,6 +233,18 @@ public class MyAgent extends Agent {
 				  {
 					  System.out.println("Diagonal Block ---->^ ");
 					  return (j + 2);
+				  }
+			  }
+			  
+			  //**Prediction Block**
+			  //If there is an empty slot in a potential diagonal that has a tile under it, continue
+			  if(!myGame.getColumn(j + 1).getSlot(k - 1).getIsFilled() && myGame.getColumn(j + 1).getSlot(k).getIsFilled()) 
+			  {
+				  //if the diagonal after the empty is also not the same color as MyAgent, place a column in the previous empty slot
+				  if(myGame.getColumn(j + 2).getSlot(k - 2).getIsFilled() && myGame.getColumn(j + 2).getSlot(k - 2).getIsRed() != iAmRed) 
+				  {
+					  System.out.println("Prediction BlockR ---->^");
+					  return (j + 1);
 				  }
 			  }
 		  }
@@ -252,6 +265,18 @@ public class MyAgent extends Agent {
 					  System.out.println("Diagonal Block ^<----");
 					  return (j - 2);
 				 }
+			  }
+			  
+			  //**Prediction Block**
+			  //If there is an empty slot in a potential diagonal that has a tile under it, continue
+			  if(!myGame.getColumn(j - 1).getSlot(k - 1).getIsFilled() && myGame.getColumn(j - 1).getSlot(k).getIsFilled()) 
+			  {
+				  //if the diagonal after the empty is also not the same color as MyAgent, place a column in the previous empty slot
+				  if(myGame.getColumn(j - 2).getSlot(k - 2).getIsFilled() && myGame.getColumn(j - 2).getSlot(k - 2).getIsRed() != iAmRed) 
+				  {
+					  System.out.println("Prediction BlockL ^<----");
+					  return (j - 1);
+				  }
 			  }
 		  }
 	  return -1;
@@ -307,7 +332,7 @@ public class MyAgent extends Agent {
 			  //if not on the bottom, check if the next slot is empty and the one below it is full
 			  else if(!myGame.getColumn(j - 2).getSlot(k).getIsFilled() && myGame.getColumn(j - 2).getSlot(k + 1).getIsFilled()) 
 			  {
-				  System.out.println("Sky Left Block ---->");
+				  System.out.println("Sky Left Block <----");
 				  return (j - 2);
 			  }
 		  }
