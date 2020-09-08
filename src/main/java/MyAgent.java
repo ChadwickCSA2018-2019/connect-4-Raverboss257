@@ -52,12 +52,12 @@ public class MyAgent extends Agent {
 	 {
 		 moveOnColumn(checkWin);
 	 }
-	 else if(!myGame.getColumn(3).getIsFull()) 
+	/* else if(!myGame.getColumn(3).getIsFull()) 
 	 {
 		 moveOnColumn(3);
 		 if(printMoves)
 		 {System.out.println("Going for the Middle");}
-	 }
+	 }*/
 	 else moveOnColumn(randomMove());
   }
 
@@ -177,16 +177,17 @@ public class MyAgent extends Agent {
 				  //If an opposite tile is found, run the checks
 				  if(initSlot.getIsFilled() && initSlot.getIsRed() != iAmRed) 
 				  {
-					//Check to see if a strategic column was chosen (!= -1)
-					 int valReturn = verticalBlock(j);
+					/*If -1 is returned, no strategic move was found
+					 **Defensive Blocks Below**/
+					 int valReturn = vertBlock(j);
 					 if(valReturn != -1) 
 					 {return valReturn;}
 					 
-					 valReturn = horizontalBlockR(j,k);
+					 valReturn = horzBlockR(j,k);
 					 if(valReturn != -1)
 					 {return valReturn;}
 					 
-					 valReturn = horizontalBlockL(j,k);
+					 valReturn = horzBlockL(j,k);
 					 if(valReturn != -1) 
 					 {return valReturn;}
 					  
@@ -197,29 +198,137 @@ public class MyAgent extends Agent {
 					 valReturn = leftDiagonal(j,k);
 					 if(valReturn != -1) 
 					 {return valReturn;}
+					 
+					 //**Prediction Blocks
 				  }
 			  }
 		  }
     return -1;
   }
   
-  private int verticalBlock(int j) {
-		  int k = getLowestEmptyIndex(myGame.getColumn(j));
-			 Connect4Slot curSlot = myGame.getColumn(j).getSlot(k + 1);
-			 //Check if curSlot is within game boundaries and is worth checking (3 above bottom)
-			 if(k <= myGame.getRowCount()- 4 && k >= 0)
-				 if(curSlot.getIsFilled())
-				 {
-					//If 3 vertical slots are opposite color, place a token on top 
-					 if(curSlot.getIsRed() != iAmRed && myGame.getColumn(j).getSlot(k + 2).getIsRed() != iAmRed && myGame.getColumn(j).getSlot(k + 3).getIsRed() != iAmRed) 
-					 {
-						 if(printMoves)
-						 {System.out.println("Vertical Block");}
-						 return j;
-					 }
-			 }
+  //Defensive Block methods
+  //Note: the first found tile that doesn't match MyAgent is what triggers these methods
+  //so while there may appear to only be three checks, there are in fact 4 when including the trigger check
+  private int vertBlock(int j) 
+  {
+	  //Get the lowest empty index and search below it as the first check
+	  int k = getLowestEmptyIndex(myGame.getColumn(j));
+	  Connect4Slot curSlot = myGame.getColumn(j).getSlot(k + 1);
+	  //Check if curSlot is within game boundaries and is at least 3 above bottom
+		 if(k <= myGame.getRowCount()- 4 && k >= 0)
+			//If 3 vertical slots are filled of opposite MyAgent color, place a token on top 
+			 if(curSlot.getIsFilled() && curSlot.getIsRed() != iAmRed) 
+				 if(myGame.getColumn(j).getSlot(k + 2).getIsFilled() && myGame.getColumn(j).getSlot(k + 2).getIsRed() != iAmRed)
+					 if(myGame.getColumn(j).getSlot(k + 3).getIsFilled() && myGame.getColumn(j).getSlot(k + 3).getIsRed() != iAmRed)
+					 	{
+						 	if(printMoves)
+						 	{System.out.println("Vertical Block");}
+						 	return j;
+					 	}
 	  return -1;
   }
+  
+  private int horzBlockR(int j, int k) 
+  {
+	//Check Restrictions first
+	  if(j <= myGame.getColumnCount() -4)
+	  {
+		  //(Found one, hole, found two)
+		  if(!myGame.getColumn(j + 1).getSlot(k).getIsFilled())
+			  if(myGame.getColumn(j + 2).getSlot(k).getIsFilled() && myGame.getColumn(j + 2).getSlot(k).getIsRed() != iAmRed)
+				  if(myGame.getColumn(j + 3).getSlot(k).getIsFilled() && myGame.getColumn(j + 3).getSlot(k).getIsRed() != iAmRed) 
+					  //check if slot is on bottom to prevent array.outOfBounds
+					  if(k == myGame.getRowCount() -1)
+					  {
+						  if(printMoves)
+						  {System.out.println("Horz Block Ground (one-hole-two) --->");}
+						  return (j + 1);
+					  }
+		  			  //if it's mid-air, make sure there is a block below where to place
+					  else if(myGame.getColumn(j + 1).getSlot(k + 1).getIsFilled()) 
+					  {
+						  if(printMoves)
+						  {System.out.println("Horz Block Air (one-hole-two) ---->");}
+						  return (j + 1); 
+					  }
+		  //(Found two, hole, found one)
+		  if(myGame.getColumn(j + 1).getSlot(k).getIsFilled() && myGame.getColumn(j + 1).getSlot(k).getIsRed() != iAmRed)
+			  if(!myGame.getColumn(j + 2).getSlot(k).getIsFilled())
+				  if(myGame.getColumn(j + 3).getSlot(k).getIsFilled() && myGame.getColumn(j + 3).getSlot(k).getIsRed() != iAmRed) 
+					//check if slot is on bottom to prevent array.outOfBounds
+					  if(k == myGame.getRowCount() -1)
+					  {
+						  if(printMoves)
+						  {System.out.println("Horz Block Ground (two-hole-one) ---->");}
+						  return (j + 2);
+					  }
+		  			  //if it's mid-air, make sure there is a block below where to place
+					  else if(myGame.getColumn(j + 2).getSlot(k + 1).getIsFilled()) 
+					  {
+						  if(printMoves)
+						  {System.out.println("Horz Block Air (two-hole-one) ---->");}
+						  return (j + 2); 
+					  } 
+		  //(Found three, hole)
+		  if(myGame.getColumn(j + 1).getSlot(k).getIsFilled() && myGame.getColumn(j + 1).getSlot(k).getIsRed() != iAmRed)
+			  if(myGame.getColumn(j + 2).getSlot(k).getIsFilled() && myGame.getColumn(j + 2).getSlot(k).getIsRed() != iAmRed)
+				  if(!myGame.getColumn(j + 3).getSlot(k).getIsFilled())
+					  if(k == myGame.getRowCount() -1)
+					  {
+						  if(printMoves)
+						  {System.out.println("Horz Block Ground (three-one) ---->");}
+						  return (j + 3);
+					  }
+		  			  //if it's mid-air, make sure there is a block below where to place
+					  else if(myGame.getColumn(j + 3).getSlot(k + 1).getIsFilled()) 
+					  {
+						  if(printMoves)
+						  {System.out.println("Horz Block Air (three-one) ---->");}
+						  return (j + 3); 
+					  } 
+	  }
+	  return -1;
+  }
+  
+  private int horzBlockL(int j, int k) 
+  {
+		//Check Restrictions first
+	  	if(j >= 3)
+		  {
+	  		//Note: Since (one-hole-two) reversed is (two-hole-one), which is checked in horzBlockR,
+	  		//the "leftward sweep" process of checking that here too is not required
+	  		//(Found three, hole)
+			  if(myGame.getColumn(j - 1).getSlot(k).getIsFilled() && myGame.getColumn(j - 1).getSlot(k).getIsRed() != iAmRed)
+				  if(myGame.getColumn(j - 2).getSlot(k).getIsFilled() && myGame.getColumn(j - 2).getSlot(k).getIsRed() != iAmRed)
+					  if(!myGame.getColumn(j - 3).getSlot(k).getIsFilled())
+						  if(k == myGame.getRowCount() -1)
+						  {
+							  if(printMoves)
+							  {System.out.println("Horz Block Ground (three-one) <----");}
+							  return (j - 3);
+						  }
+			  			  //if it's mid-air, make sure there is a block below where to place
+						  else if(myGame.getColumn(j - 3).getSlot(k + 1).getIsFilled()) 
+						  {
+							  if(printMoves)
+							  {System.out.println("Horz Block Air (three-one) <----");}
+							  return (j - 3); 
+						  } 
+		  }  
+		  return -1;
+  }
+  
+  private int diagBlockR() 
+  {
+	  return -1;
+  }
+  
+  private int diagBlockL() 
+  {
+	  return -1;
+  }
+  
+  
   
   private int rightDiagonal(int j, int k)
   {
