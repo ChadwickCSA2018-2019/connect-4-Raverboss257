@@ -141,19 +141,15 @@ public class MyAgent extends Agent {
   private int playVertical(int j) 
   {
 	  //Find the lowest empty index for column j
-		 int k = getLowestEmptyIndex(myGame.getColumn(j));
-		 Connect4Slot curSlot = myGame.getColumn(j).getSlot(k + 1); 
+		 int k = getLowestEmptyIndex(myGame.getColumn(j)); 
 		 //Make sure current row doesn't exceed game boundaries
 		 if(k != myGame.getRowCount() - 1 && k >= 0)
-		 if(curSlot.getIsFilled())
+		 if(myGame.getColumn(j).getSlot(k + 1).getIsFilled() && myGame.getColumn(j).getSlot(k + 1).getIsRed() != iAmRed) 
 		 {
 			//If the slot is filled with the same color, return the column number
-			if(curSlot.getIsRed() == iAmRed) 
-			{
-				if(printMoves)
-				{System.out.println("Advancing Vertical");}
-				return j;
-			}
+			if(printMoves)
+			{System.out.println("Advancing Vertical");}
+			return j;
 		 } 
 	  return -1;
   }
@@ -191,11 +187,11 @@ public class MyAgent extends Agent {
 					 if(valReturn != -1) 
 					 {return valReturn;}
 					  
-					 valReturn = rightDiagonal(j,k);
+					 valReturn = diagBlockR(j,k);
 					 if(valReturn != -1) 
 					 {return valReturn;}
 					 
-					 valReturn = leftDiagonal(j,k);
+					 valReturn = diagBlockL(j,k);
 					 if(valReturn != -1) 
 					 {return valReturn;}
 					 
@@ -295,8 +291,8 @@ public class MyAgent extends Agent {
 		//Check Restrictions first
 	  	if(j >= 3)
 		  {
-	  		//Note: Since (one-hole-two) reversed is (two-hole-one), which is checked in horzBlockR,
-	  		//the "leftward sweep" process of checking that here too is not required
+	  		//Note: Since (one-hole-two) reversed is (two-hole-one), and there is no vertical difference between looking left or right,
+	  		//checking both of those here are not required, as it will be caught in the right horizontal block before this method is called
 	  		//(Found three, hole)
 			  if(myGame.getColumn(j - 1).getSlot(k).getIsFilled() && myGame.getColumn(j - 1).getSlot(k).getIsRed() != iAmRed)
 				  if(myGame.getColumn(j - 2).getSlot(k).getIsFilled() && myGame.getColumn(j - 2).getSlot(k).getIsRed() != iAmRed)
@@ -318,16 +314,94 @@ public class MyAgent extends Agent {
 		  return -1;
   }
   
-  private int diagBlockR() 
+  private int diagBlockR(int j, int k) 
   {
+	  //Check restrictions first
+	  if(j <= myGame.getColumnCount() - 4 && k >= 3)
+	  {
+		  //(Found one, hole, found two)
+		  if(!myGame.getColumn(j + 1).getSlot(k - 1).getIsFilled())
+			  if(myGame.getColumn(j + 2).getSlot(k - 2).getIsFilled() && myGame.getColumn(j + 2).getSlot(k - 2).getIsRed() != iAmRed)
+				  if(myGame.getColumn(j + 3).getSlot(k - 3).getIsFilled() && myGame.getColumn(j + 3).getSlot(k - 3).getIsRed() != iAmRed) 
+					  //If there is a slot below the empty slot, go there
+					  	if(myGame.getColumn(j + 1).getSlot(k).getIsFilled()) 
+					  	{
+					  		if(printMoves)
+							{System.out.println("Diag Block (one-hole-two) ---->^");}
+					  		return (j + 1);
+					  	}
+		  				//TODO If there was not a slot filled below the previous, but there was one filled below THAT one, DO NOT go there if possible.
+		  
+		  //(Found two, hole, found one)
+		  if(myGame.getColumn(j + 1).getSlot(k - 1).getIsFilled() && myGame.getColumn(j + 1).getSlot(k - 1).getIsRed() != iAmRed)
+			  if(!myGame.getColumn(j + 2).getSlot(k - 2).getIsFilled())
+				  if(myGame.getColumn(j + 3).getSlot(k - 3).getIsFilled() && myGame.getColumn(j + 3).getSlot(k - 3).getIsRed() != iAmRed)
+					  if(myGame.getColumn(j + 2).getSlot(k - 1).getIsFilled()) 
+					  {
+						  if(printMoves)
+						  {System.out.println("Diag Block (two-hole-one) ---->^");}
+						  return (j + 2);
+					  }
+		  			//TODO If there was not a slot filled below the previous, but there was one filled below THAT one, DO NOT go there if possible.
+		//(Found three, hole)
+		  if(myGame.getColumn(j + 1).getSlot(k - 1).getIsFilled() && myGame.getColumn(j + 1).getSlot(k - 1).getIsRed() != iAmRed)
+			  if(myGame.getColumn(j + 2).getSlot(k - 2).getIsFilled() && myGame.getColumn(j + 2).getSlot(k - 2).getIsRed() != iAmRed)
+				  if(!myGame.getColumn(j + 3).getSlot(k - 3).getIsFilled())
+					  if(myGame.getColumn(j + 3).getSlot(k - 2).getIsFilled()) 
+					  {
+						  if(printMoves)
+						  {System.out.println("Diag Block (three-one) ---->^");}
+						  return (j + 3);
+					  }
+	  }
 	  return -1;
   }
   
-  private int diagBlockL() 
+  private int diagBlockL(int j, int k) 
   {
+	  //Check restrictions first
+	  if(j >= 3 && k >= 3)
+	  {
+		  //(Found one, hole, found two)
+		  if(!myGame.getColumn(j - 1).getSlot(k - 1).getIsFilled())
+			  if(myGame.getColumn(j - 2).getSlot(k - 2).getIsFilled() && myGame.getColumn(j - 2).getSlot(k - 2).getIsRed() != iAmRed)
+				  if(myGame.getColumn(j - 3).getSlot(k - 3).getIsFilled() && myGame.getColumn(j - 3).getSlot(k - 3).getIsRed() != iAmRed) 
+					  //If there is a slot below the empty slot, go there
+					  	if(myGame.getColumn(j - 1).getSlot(k).getIsFilled()) 
+					  	{
+					  		if(printMoves)
+							{System.out.println("Diag Block (one-hole-two) ^<----");}
+					  		return (j - 1);
+					  	}
+		  				//TODO If there was not a slot filled below the previous, but there was one filled below THAT one, DO NOT go there if possible.
+		  
+		  //(Found two, hole, found one)
+		  if(myGame.getColumn(j - 1).getSlot(k - 1).getIsFilled() && myGame.getColumn(j - 1).getSlot(k - 1).getIsRed() != iAmRed)
+			  if(!myGame.getColumn(j - 2).getSlot(k - 2).getIsFilled())
+				  if(myGame.getColumn(j - 3).getSlot(k - 3).getIsFilled() && myGame.getColumn(j - 3).getSlot(k - 3).getIsRed() != iAmRed)
+					  if(myGame.getColumn(j - 2).getSlot(k - 1).getIsFilled()) 
+					  {
+						  if(printMoves)
+						  {System.out.println("Diag Block (two-hole-one) ^<----");}
+						  return (j - 2);
+					  }
+		  			//TODO If there was not a slot filled below the previous, but there was one filled below THAT one, DO NOT go there if possible.
+		//(Found three, hole)
+		  if(myGame.getColumn(j - 1).getSlot(k - 1).getIsFilled() && myGame.getColumn(j - 1).getSlot(k - 1).getIsRed() != iAmRed)
+			  if(myGame.getColumn(j - 2).getSlot(k - 2).getIsFilled() && myGame.getColumn(j - 2).getSlot(k - 2).getIsRed() != iAmRed)
+				  if(!myGame.getColumn(j - 3).getSlot(k - 3).getIsFilled())
+					  if(myGame.getColumn(j - 3).getSlot(k - 2).getIsFilled()) 
+					  {
+						  if(printMoves)
+						  {System.out.println("Diag Block (three-one) ^<----");}
+						  return (j - 3);
+					  }
+	  }
 	  return -1;
   }
   
+  
+  //******OLD METHODS******
   
   
   private int rightDiagonal(int j, int k)
