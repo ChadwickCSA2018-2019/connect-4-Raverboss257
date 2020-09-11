@@ -52,12 +52,12 @@ public class MyAgent extends Agent {
 	 {
 		 moveOnColumn(checkWin);
 	 }
-	/* else if(!myGame.getColumn(3).getIsFull()) 
+	 else if(!myGame.getColumn(3).getIsFull()) 
 	 {
 		 moveOnColumn(3);
 		 if(printMoves)
 		 {System.out.println("Going for the Middle");}
-	 }*/
+	 }
 	 else moveOnColumn(randomMove());
   }
 
@@ -144,7 +144,7 @@ public class MyAgent extends Agent {
 		 int k = getLowestEmptyIndex(myGame.getColumn(j)); 
 		 //Make sure current row doesn't exceed game boundaries
 		 if(k != myGame.getRowCount() - 1 && k >= 0)
-		 if(myGame.getColumn(j).getSlot(k + 1).getIsFilled() && myGame.getColumn(j).getSlot(k + 1).getIsRed() != iAmRed) 
+		 if(myGame.getColumn(j).getSlot(k + 1).getIsFilled() && myGame.getColumn(j).getSlot(k + 1).getIsRed() == iAmRed) 
 		 {
 			//If the slot is filled with the same color, return the column number
 			if(printMoves)
@@ -195,7 +195,27 @@ public class MyAgent extends Agent {
 					 if(valReturn != -1) 
 					 {return valReturn;}
 					 
+					 
 					 //**Prediction Blocks
+					 valReturn = vertPredict(j);
+					 if(valReturn != -1) 
+					 {return valReturn;}
+					 
+					 valReturn = horzPredictR(j, k);
+					 if(valReturn != -1) 
+					 {return valReturn;}
+					 
+					 valReturn = horzPredictL(j, k);
+					 if(valReturn != -1) 
+					 {return valReturn;}
+					 
+					 valReturn = diagPredictR(j, k);
+					 if(valReturn != -1) 
+					 {return valReturn;}
+					 
+					 valReturn = diagPredictL(j, k);
+					 if(valReturn != -1) 
+					 {return valReturn;}
 				  }
 			  }
 		  }
@@ -209,11 +229,10 @@ public class MyAgent extends Agent {
   {
 	  //Get the lowest empty index and search below it as the first check
 	  int k = getLowestEmptyIndex(myGame.getColumn(j));
-	  Connect4Slot curSlot = myGame.getColumn(j).getSlot(k + 1);
 	  //Check if curSlot is within game boundaries and is at least 3 above bottom
 		 if(k <= myGame.getRowCount()- 4 && k >= 0)
 			//If 3 vertical slots are filled of opposite MyAgent color, place a token on top 
-			 if(curSlot.getIsFilled() && curSlot.getIsRed() != iAmRed) 
+			 if(myGame.getColumn(j).getSlot(k + 1).getIsFilled() && myGame.getColumn(j).getSlot(k + 1).getIsRed() != iAmRed) 
 				 if(myGame.getColumn(j).getSlot(k + 2).getIsFilled() && myGame.getColumn(j).getSlot(k + 2).getIsRed() != iAmRed)
 					 if(myGame.getColumn(j).getSlot(k + 3).getIsFilled() && myGame.getColumn(j).getSlot(k + 3).getIsRed() != iAmRed)
 					 	{
@@ -268,46 +287,48 @@ public class MyAgent extends Agent {
 		  //(Found three, hole)
 		  if(myGame.getColumn(j + 1).getSlot(k).getIsFilled() && myGame.getColumn(j + 1).getSlot(k).getIsRed() != iAmRed)
 			  if(myGame.getColumn(j + 2).getSlot(k).getIsFilled() && myGame.getColumn(j + 2).getSlot(k).getIsRed() != iAmRed)
+				  //If it's on ground, don't check below to avoid array outOfBounds
 				  if(!myGame.getColumn(j + 3).getSlot(k).getIsFilled())
 					  if(k == myGame.getRowCount() -1)
 					  {
 						  if(printMoves)
-						  {System.out.println("Horz Block Ground (three-one) ---->");}
+						  {System.out.println("Horz Block Ground (three-hole) ---->");}
 						  return (j + 3);
 					  }
 		  			  //if it's mid-air, make sure there is a block below where to place
 					  else if(myGame.getColumn(j + 3).getSlot(k + 1).getIsFilled()) 
 					  {
 						  if(printMoves)
-						  {System.out.println("Horz Block Air (three-one) ---->");}
+						  {System.out.println("Horz Block Air (three-hole) ---->");}
 						  return (j + 3); 
 					  } 
 	  }
 	  return -1;
   }
   
+//Note: Since (one-hole-two) reversed is (two-hole-one), and there is no vertical difference between looking left or right,
+//checking both of those here are not required, as it will be caught in horzBlockR before this method is called
   private int horzBlockL(int j, int k) 
   {
 		//Check Restrictions first
 	  	if(j >= 3)
 		  {
-	  		//Note: Since (one-hole-two) reversed is (two-hole-one), and there is no vertical difference between looking left or right,
-	  		//checking both of those here are not required, as it will be caught in the right horizontal block before this method is called
 	  		//(Found three, hole)
 			  if(myGame.getColumn(j - 1).getSlot(k).getIsFilled() && myGame.getColumn(j - 1).getSlot(k).getIsRed() != iAmRed)
 				  if(myGame.getColumn(j - 2).getSlot(k).getIsFilled() && myGame.getColumn(j - 2).getSlot(k).getIsRed() != iAmRed)
+					  //If it's on ground, don't check below to avoid array outOfBounds
 					  if(!myGame.getColumn(j - 3).getSlot(k).getIsFilled())
 						  if(k == myGame.getRowCount() -1)
 						  {
 							  if(printMoves)
-							  {System.out.println("Horz Block Ground (three-one) <----");}
+							  {System.out.println("Horz Block Ground (three-hole) <----");}
 							  return (j - 3);
 						  }
 			  			  //if it's mid-air, make sure there is a block below where to place
 						  else if(myGame.getColumn(j - 3).getSlot(k + 1).getIsFilled()) 
 						  {
 							  if(printMoves)
-							  {System.out.println("Horz Block Air (three-one) <----");}
+							  {System.out.println("Horz Block Air (three-hole) <----");}
 							  return (j - 3); 
 						  } 
 		  }  
@@ -319,6 +340,19 @@ public class MyAgent extends Agent {
 	  //Check restrictions first
 	  if(j <= myGame.getColumnCount() - 4 && k >= 3)
 	  {
+		  //(hole, found three) --- this is really like found three, and there is an empty one behind the 3-pattern
+		  //Note: there is also a slightly tighter restriction for this one, and it won't work from the ground currently
+		  if(j > 1 && k < myGame.getRowCount() - 2)
+		  if(myGame.getColumn(j + 1).getSlot(k - 1).getIsFilled() && myGame.getColumn(j + 1).getSlot(k - 1).getIsRed() != iAmRed)
+			  if(myGame.getColumn(j + 2).getSlot(k - 2).getIsFilled() && myGame.getColumn(j + 2).getSlot(k - 2).getIsRed() != iAmRed)
+				  //check for an empty hole before the trigger tile was found && if there's a tile below it. If both true, place on the empty column
+				  if(!myGame.getColumn(j - 1).getSlot(k + 1).getIsFilled())
+					  if(myGame.getColumn(j - 1).getSlot(k + 2).getIsFilled()) 
+					  {
+						  if(printMoves)
+						  {System.out.println("Diag Block (hole-three) ---->^			IT'S THE RARE ONE :D");}
+						  return (j + 3);
+					  }
 		  //(Found one, hole, found two)
 		  if(!myGame.getColumn(j + 1).getSlot(k - 1).getIsFilled())
 			  if(myGame.getColumn(j + 2).getSlot(k - 2).getIsFilled() && myGame.getColumn(j + 2).getSlot(k - 2).getIsRed() != iAmRed)
@@ -350,7 +384,7 @@ public class MyAgent extends Agent {
 					  if(myGame.getColumn(j + 3).getSlot(k - 2).getIsFilled()) 
 					  {
 						  if(printMoves)
-						  {System.out.println("Diag Block (three-one) ---->^");}
+						  {System.out.println("Diag Block (three-hole) ---->^");}
 						  return (j + 3);
 					  }
 	  }
@@ -362,6 +396,19 @@ public class MyAgent extends Agent {
 	  //Check restrictions first
 	  if(j >= 3 && k >= 3)
 	  {
+		  //(hole, found three) --- this is really like found three, and there is an empty one behind the 3-pattern
+		  //Note: there is also a slightly tighter restriction for this one, and it won't work from the ground currently
+		  if(j < myGame.getColumnCount() - 2 && k < myGame.getRowCount() - 2)
+		  if(myGame.getColumn(j - 1).getSlot(k - 1).getIsFilled() && myGame.getColumn(j - 1).getSlot(k - 1).getIsRed() != iAmRed)
+			  if(myGame.getColumn(j - 2).getSlot(k - 2).getIsFilled() && myGame.getColumn(j - 2).getSlot(k - 2).getIsRed() != iAmRed)
+				  //check for an empty hole before the trigger tile was found and if there's a tile below it to place on-top of
+				  if(!myGame.getColumn(j + 1).getSlot(k + 1).getIsFilled())
+					  if(myGame.getColumn(j + 1).getSlot(k + 2).getIsFilled()) 
+					  {
+						  if(printMoves)
+						  {System.out.println("Diag Block (hole-three) ^<----			IT'S THE RARE ONE :D");}
+						  return (j + 1);
+					  }
 		  //(Found one, hole, found two)
 		  if(!myGame.getColumn(j - 1).getSlot(k - 1).getIsFilled())
 			  if(myGame.getColumn(j - 2).getSlot(k - 2).getIsFilled() && myGame.getColumn(j - 2).getSlot(k - 2).getIsRed() != iAmRed)
@@ -401,8 +448,177 @@ public class MyAgent extends Agent {
   }
   
   
-  //******OLD METHODS******
   
+  
+  //Prediction Block methods
+  private int vertPredict(int j) 
+  {
+	//Get the lowest empty index and search below it as the first check
+	  int k = getLowestEmptyIndex(myGame.getColumn(j));
+	//Check if curSlot is within game boundaries and is at least 2 above bottom
+		if(k <= myGame.getRowCount()- 3 && k > 0)
+			//If 2 vertical slots are filled of opposite MyAgent color, place a token on top 
+			 if(myGame.getColumn(j).getSlot(k + 1).getIsFilled() && myGame.getColumn(j).getSlot(k + 1).getIsRed() != iAmRed) 
+				 if(myGame.getColumn(j).getSlot(k + 2).getIsFilled() && myGame.getColumn(j).getSlot(k + 2).getIsRed() != iAmRed)
+					 	{
+						 	if(printMoves)
+						 	{System.out.println("Vertical *Prediction* Block");}
+						 	return j;
+					 	}
+	  return -1;
+  }
+  
+  private int horzPredictR(int j, int k)
+  {
+	  return -1;
+  }
+  
+  private int horzPredictL(int j, int k)
+  {
+	  return -1;
+  }
+  
+  private int diagPredictR(int j, int k) 
+  {  
+	  //Check Restrictions first
+	  if(j <= myGame.getColumnCount() -4 && k >= 3) 
+	  {
+		//(found one, hole, found one, hole) [place on column that has a tile filled below the empty slot]
+		  if(!myGame.getColumn(j + 1).getSlot(k - 1).getIsFilled())
+			  if(myGame.getColumn(j + 2).getSlot(k - 2).getIsFilled() && myGame.getColumn(j + 2).getSlot(k - 2).getIsRed() != iAmRed)
+				  if(!myGame.getColumn(j + 3).getSlot(k - 3).getIsFilled())
+				  //Check which (if any) empty column has a tile below that can be placed on-top of
+					  if(myGame.getColumn(j + 1).getSlot(k).getIsFilled())
+					  {
+						  if(printMoves)
+						  {System.out.println("Diagonal *Prediction* Block (one-hole[here]-one-hole) ---->^");}
+						  return (j + 1);
+					  }
+					  else if(myGame.getColumn(j + 3).getSlot(k - 2).getIsFilled())
+		  				{
+						  if(printMoves)
+						  {System.out.println("Diagonal *Prediction* Block (one-hole-one-hole[here]) ---->^");}
+						  return (j + 3);
+		  				}
+		//(found two, two holes) [place on column that has a tile filled below the potential pattern]
+		  if(myGame.getColumn(j + 1).getSlot(k - 1).getIsFilled() && myGame.getColumn(j + 1).getSlot(k - 1).getIsRed() != iAmRed)
+			  if(!myGame.getColumn(j + 2).getSlot(k - 2).getIsFilled())
+				  if(!myGame.getColumn(j + 3).getSlot(k - 3).getIsFilled())
+					  //Check which (if any) empty column has a tile below that can be placed on-top of
+					  if(myGame.getColumn(j + 2).getSlot(k - 1).getIsFilled()) 
+					  {
+						  if(printMoves)
+						  {System.out.println("Diagonal *Prediction* Block (two-hole[here]-hole) ---->^");}
+						  return (j + 2);
+					  }
+					  else if(myGame.getColumn(j + 3).getSlot(k - 2).getIsFilled()) 
+					  {
+						  if(printMoves)
+						  {System.out.println("Diagonal *Prediction* Block (two-hole-hole[here]) ---->^");}
+						  return (j + 3);
+					  }
+	  }
+	  
+	//(hole, found two, hole) [place on column that has a tile filled below the empty slot]
+	//Note: there is also a slightly more complicated restriction for this one, and it won't work from the ground currently
+	 if(j >= 1 && j <= myGame.getColumnCount() -3 && k >= 2 && k <= myGame.getRowCount() - 3) 
+	 {
+		 if(myGame.getColumn(j + 1).getSlot(k - 1).getIsFilled() && myGame.getColumn(j + 1).getSlot(k - 1).getIsRed() != iAmRed)
+			if(!myGame.getColumn(j + 2).getSlot(k - 2).getIsFilled())
+				if(!myGame.getColumn(j - 1).getSlot(k + 1).getIsFilled())
+					//Check which (if any) empty column has a tile below that can be placed on-top of
+					 if(myGame.getColumn(j - 1).getSlot(k + 2).getIsFilled())
+					 {
+						if(printMoves)
+						{System.out.println("Diagonal *Prediction* Block (hole[here]-two-hole) ---->^");}
+						return (j - 1);
+					}
+					else if (!myGame.getColumn(j + 2).getSlot(k - 1).getIsFilled()) 
+					{
+						if(printMoves)
+						{System.out.println("Diagonal *Prediction* Block (hole-two-hole[here]) ---->^");}
+						return (j + 2);	
+					}				 
+	 }
+			  
+	  return -1;
+  }
+  private int diagPredictL(int j, int k) 
+  {
+	  //Check Restrictions first
+	  if(j >= 3 && k >= 3) 
+	  {
+		//(found one, hole, found one, hole) [place on column that has a tile filled below the empty slot]
+		  if(!myGame.getColumn(j - 1).getSlot(k - 1).getIsFilled())
+			  if(myGame.getColumn(j - 2).getSlot(k - 2).getIsFilled() && myGame.getColumn(j - 2).getSlot(k - 2).getIsRed() != iAmRed)
+				  if(!myGame.getColumn(j - 3).getSlot(k - 3).getIsFilled())
+				  //Check which (if any) empty column has a tile below that can be placed on-top of
+					  if(myGame.getColumn(j - 1).getSlot(k).getIsFilled())
+					  {
+						  if(printMoves)
+						  {System.out.println("Diagonal *Prediction* Block (one-hole[here]-one-hole) ^<----");}
+						  return (j - 1);
+					  }
+					  else if(myGame.getColumn(j - 3).getSlot(k - 2).getIsFilled())
+		  				{
+						  if(printMoves)
+						  {System.out.println("Diagonal *Prediction* Block (one-hole-one-hole[here]) ^<----");}
+						  return (j - 3);
+		  				}
+		//(found two, two holes) [place on column that has a tile filled below the potential pattern]
+		  if(myGame.getColumn(j - 1).getSlot(k - 1).getIsFilled() && myGame.getColumn(j - 1).getSlot(k - 1).getIsRed() != iAmRed)
+			  if(!myGame.getColumn(j - 2).getSlot(k - 2).getIsFilled())
+				  if(!myGame.getColumn(j - 3).getSlot(k - 3).getIsFilled())
+					  //Check which (if any) empty column has a tile below that can be placed on-top of
+					  if(myGame.getColumn(j - 2).getSlot(k - 1).getIsFilled()) 
+					  {
+						  if(printMoves)
+						  {System.out.println("Diagonal *Prediction* Block (two-hole[here]-hole) ^<----");}
+						  return (j - 2);
+					  }
+					  else if(myGame.getColumn(j - 3).getSlot(k - 2).getIsFilled()) 
+					  {
+						  if(printMoves)
+						  {System.out.println("Diagonal *Prediction* Block (two-hole-hole[here]) ^<----");}
+						  return (j - 3);
+					  }
+	  }
+	  
+	//(hole, found two, hole) [place on column that has a tile filled below the empty slot]
+	//Note: there is also a slightly more complicated for this one, and it won't work from the ground currently
+	 if(j <= myGame.getColumnCount() -2 && j >= 2 && k >= 2 && k <= myGame.getRowCount() - 3) 
+	 {
+		 if(myGame.getColumn(j - 1).getSlot(k - 1).getIsFilled() && myGame.getColumn(j - 1).getSlot(k - 1).getIsRed() != iAmRed)
+			if(!myGame.getColumn(j - 2).getSlot(k - 2).getIsFilled())
+				if(!myGame.getColumn(j + 1).getSlot(k + 1).getIsFilled())
+					//Check which (if any) empty column has a tile below that can be placed on-top of
+					 if(myGame.getColumn(j + 1).getSlot(k + 2).getIsFilled())
+					 {
+						if(printMoves)
+						{System.out.println("Diagonal *Prediction* Block (hole[here]-two-hole) ^<----");}
+						return (j + 1);
+					}
+					else if (!myGame.getColumn(j - 2).getSlot(k - 1).getIsFilled()) 
+					{
+						if(printMoves)
+						{System.out.println("Diagonal *Prediction* Block (hole-two-hole[here]) ^<----");}
+						return (j - 2);	
+					}				 
+	 }
+	  return -1;
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  //******OLD METHODS******
   
   private int rightDiagonal(int j, int k)
   {
