@@ -353,7 +353,7 @@ public class MyAgent extends Agent {
 					  if(myGame.getColumn(j - 1).getSlot(k + 2).getIsFilled()) 
 					  {
 						  if(printMoves)
-						  {System.out.println("Diag Block (hole-three) ---->^			IT'S THE RARE ONE :D");}
+						  {System.out.println("Diag Block (hole-three) ---->^");}
 						  return (j + 3);
 					  }
 		  //(Found one, hole, found two)
@@ -409,7 +409,7 @@ public class MyAgent extends Agent {
 					  if(myGame.getColumn(j + 1).getSlot(k + 2).getIsFilled()) 
 					  {
 						  if(printMoves)
-						  {System.out.println("Diag Block (hole-three) ^<----			IT'S THE RARE ONE :D");}
+						  {System.out.println("Diag Block (hole-three) ^<----");}
 						  return (j + 1);
 					  }
 		  //(Found one, hole, found two)
@@ -484,13 +484,13 @@ public class MyAgent extends Agent {
 				  if(myGame.getColumn(j + 2).getSlot(k + 1).getIsFilled())
 				  {
 					  if(printMoves)
-					  {System.out.println("horizontal *Prediction* Block (two-hole[here]-hole)---->				YO FAAAM");}
+					  {System.out.println("horizontal *Prediction* Block (two-hole[here]-hole)---->");}
 					  return (j + 2);
 				  }
 				  else if(myGame.getColumn(j + 3).getSlot(k + 1).getIsFilled()) 
 				  {
 					  if(printMoves)
-					  {System.out.println("horizontal *Prediction* Block (two-hole-hole[here])---->				YO FAAAM");}
+					  {System.out.println("horizontal *Prediction* Block (two-hole-hole[here])---->");}
 					  return (j + 3);
 				  }
 	  
@@ -500,13 +500,13 @@ public class MyAgent extends Agent {
 				  if(myGame.getColumn(j + 1).getSlot(k + 1).getIsFilled())
 				  {
 					  if(printMoves)
-					  {System.out.println("horizontal *Prediction* Block (hole-one-hole[here]-one)---->				YO BLAAAAM");}
+					  {System.out.println("horizontal *Prediction* Block (hole-one-hole[here]-one)---->");}
 					  return (j + 1);  
 				  }
 				  else if(myGame.getColumn(j - 1).getSlot(k + 1).getIsFilled())
 				  {
 					  	if(printMoves)
-					  	{System.out.println("horizontal *Prediction* Block (hole[here]-one-hole-one)---->				YO BLAAAAM");}
+					  	{System.out.println("horizontal *Prediction* Block (hole[here]-one-hole-one)---->");}
 					  	return (j - 1);  
 				  }		
 		  //(found one, hole[here], found one, hole) **Try for[here] first, otherwise try to place in other hole**
@@ -516,13 +516,13 @@ public class MyAgent extends Agent {
 				  if(myGame.getColumn(j + 1).getSlot(k + 1).getIsFilled()) 
 				  {
 					  if(printMoves)
-					  {System.out.println("horizontal *Prediction* Block (one-hole[here]-one-hole)---->				HEYOOOOOOOO");}
+					  {System.out.println("horizontal *Prediction* Block (one-hole[here]-one-hole)---->");}
 					  return (j + 1); 
 				  }
 				  else if(myGame.getColumn(j + 3).getSlot(k + 1).getIsFilled()) 
 				  {
 					  if(printMoves)
-					  {System.out.println("horizontal *Prediction* Block (one-hole-one-hole[here])---->				HEYOOOOOOOOO");}
+					  {System.out.println("horizontal *Prediction* Block (one-hole-one-hole[here])---->");}
 					  return (j + 3);   
 				  }	   
 	  }
@@ -540,13 +540,13 @@ public class MyAgent extends Agent {
 				  if(myGame.getColumn(j - 2).getSlot(k + 1).getIsFilled())
 				  {
 					  if(printMoves)
-					  {System.out.println("horizontal *Prediction* Block (two-hole[here]-hole)<----				YO FAAAM");}
+					  {System.out.println("horizontal *Prediction* Block (two-hole[here]-hole)<----");}
 					  return (j - 2);
 				  }
 				  else if(myGame.getColumn(j - 3).getSlot(k + 1).getIsFilled()) 
 				  {
 					  if(printMoves)
-					  {System.out.println("horizontal *Prediction* Block (two-hole-hole[here])<----				YO FAAAM");}
+					  {System.out.println("horizontal *Prediction* Block (two-hole-hole[here])<----");}
 					  return (j - 3);
 				  }
 	  //Note that since (one-hole-one-hole) reversed is (hole-one-hole-one), there is no need for either method to be checked
@@ -602,13 +602,13 @@ public class MyAgent extends Agent {
 					  if(myGame.getColumn(j + 1).getSlot(k).getIsFilled()) 
 					  {
 						  if(printMoves)
-						  {System.out.println("Diagonal *Prediction* Block (one-hole[here]-hole-one)---->				NEW ONE BABY");}
+						  {System.out.println("Diagonal *Prediction* Block (one-hole[here]-hole-one)---->");}
 						  return (j + 1);
 					  }
 					  else if(myGame.getColumn(j + 2).getSlot(k - 1).getIsFilled()) 
 					  {
 						  if(printMoves)
-						  {System.out.println("Diagonal *Prediction* Block (one-hole-hole[here]-one)---->				NEW ONE BABY");}
+						  {System.out.println("Diagonal *Prediction* Block (one-hole-hole[here]-one)---->");}
 						  return (j + 2);
 					  }
 	  }
@@ -684,13 +684,13 @@ public class MyAgent extends Agent {
 					  if(myGame.getColumn(j - 1).getSlot(k).getIsFilled()) 
 					  {
 						  if(printMoves)
-						  {System.out.println("Diagonal *Prediction* Block (one-hole[here]-hole-one)<----				NEW ONE BABY");}
+						  {System.out.println("Diagonal *Prediction* Block (one-hole[here]-hole-one)<----");}
 						  return (j - 1);
 					  }
 					  else if(myGame.getColumn(j - 2).getSlot(k - 1).getIsFilled()) 
 					  {
 						  if(printMoves)
-						  {System.out.println("Diagonal *Prediction* Block (one-hole-hole[here]-one)<----				NEW ONE BABY");}
+						  {System.out.println("Diagonal *Prediction* Block (one-hole-hole[here]-one)<----");}
 						  return (j - 2);
 					  }
 	  }
