@@ -9,7 +9,12 @@ public class MyAgent extends Agent {
    * A random number generator to randomly decide where to place a token.
    */
   private Random random;
-  private boolean printMoves = true;
+  //For troubleshooting; print MyAgent moves to console
+  private boolean printMoves = false;
+  
+  //Useful for switching block methods to attack methods
+  private boolean iAmRedOp = !iAmRed;
+  private boolean iAmRedOg = iAmRed;
   /**
    * Constructs a new agent, giving it the game and telling it whether it is Red or Yellow.
    *
@@ -46,24 +51,37 @@ public class MyAgent extends Agent {
    *
    */
   public void move() {
-	 int checkWin = iCanWin();
-	 int checkLose = theyCanWin();
-	 //Check if they can win first
-	 if (checkLose != -1) 
+	  int iCanWin = iCanWin();
+	 //Check if: I can win, they can win, or if there is a possible future win.
+	 //If none are true, then choose random
+	 if(iCanWin != -1) 
 	 {
-		 moveOnColumn(checkLose);
+		 if(printMoves) {System.out.println(" 											^1");}
+		 moveOnColumn(iCanWin);
+		 return;
 	 }
-	 else if (checkWin != -1) 
+	 
+	 int theyCanWin = theyCanWin();
+	 if(theyCanWin != -1) 
 	 {
-		 moveOnColumn(checkWin);
+		 if(printMoves) {System.out.println(" 											^2");}
+		 moveOnColumn(theyCanWin);
+		 return;
 	 }
-	 else if(!myGame.getColumn(3).getIsFull()) 
+	 
+	 int tryWin = tryWin();
+	 if(tryWin != -1) 
 	 {
-		 moveOnColumn(3);
-		 if(printMoves)
-		 {System.out.println("Going for the Middle");}
+		 if(printMoves) {System.out.println(" 											^3");}
+		 moveOnColumn(tryWin);
+		 return;
 	 }
-	 else moveOnColumn(randomMove());
+	 if(printMoves) 
+	 {
+		 System.out.println("Choosing Random");	 
+		 System.out.println(" 											^4");
+	 }
+	moveOnColumn(randomMove());
   }
 
   /**
@@ -130,17 +148,106 @@ public class MyAgent extends Agent {
    *
    * @return the column that would allow the agent to win.
    */
+
   
 
   public int iCanWin()     //TODO Play to win horizontally & Diagonally
   {
-		  for (int j = 0; j < myGame.getColumnCount(); j++) 
+	  iAmRed = iAmRedOp;
+	  //Reverse the block method color to hunt for wins instead of blocks
+	  for(int j = 0; j < myGame.getColumnCount(); j++) 
+	  {
+		  for(int k = 0; k < myGame.getColumn(j).getRowCount(); k++) 
 		  {
-			int valReturn = playVertical(j);
-			if(valReturn != -1) 
-			{return valReturn;}
+			  //If an opposite tile is found, run the checks
+			  if(slot(j, k).getIsFilled() && slot(j, k).getIsRed() != iAmRed) 
+			  {
+				//If -1 is returned, no strategic move was found
+				 int valReturn = vertBlock(j);
+				 if(valReturn != -1) 
+				 {
+					 if(printMoves) 
+					 {
+						 System.out.println("^that was an intentional winning move!");
+					 }
+					 iAmRed = iAmRedOg;
+					 return valReturn;
+				 }
+				 
+				 valReturn = horzBlockR(j,k);
+				 if(valReturn != -1)
+				 {
+					 if(printMoves) 
+					 { 
+						 System.out.println("^that was an intentional winning move!");
+					 }
+					 iAmRed = iAmRedOg;
+					 return valReturn;
+				 }
+				 
+				 valReturn = horzBlockL(j,k);
+				 if(valReturn != -1) 
+				 {
+					 if(printMoves) 
+					 {
+						 System.out.println("^that was an intentional winning move!");
+					 }
+					 iAmRed = iAmRedOg;
+					 return valReturn;
+				 }
+				  
+				 valReturn = diagBlockR(j,k);
+				 if(valReturn != -1) 
+				 {
+					 if(printMoves) 
+					 {
+						 System.out.println("^that was an intentional winning move!");
+					 }
+					 iAmRed = iAmRedOg;
+					 return valReturn;
+				 }
+				 
+				 valReturn = diagBlockL(j,k);
+				 if(valReturn != -1) 
+				 {
+					 if(printMoves) 
+					 {
+						 System.out.println("^that was an intentional winning move!");
+					 }
+					 iAmRed = iAmRedOg;
+					 return valReturn;
+				 }
+			  }
 		  }
+	  }
+	  iAmRed = iAmRedOg;
     return -1;
+  }
+  
+  public int tryWin() 
+  {
+	  iAmRed = iAmRedOg;
+	  //Fill up the middle column first
+	  if(!myGame.getColumn(3).getIsFull()) 
+	  {
+		  if(printMoves) 
+		  {
+			  System.out.println("Going for the middle");
+		  }
+		  return 3;
+	  }
+	  for (int j = 0; j < myGame.getColumnCount(); j++) 
+	  {
+		iAmRed = iAmRedOg;
+		//Vertical Streak
+		int valReturn = playVertical(j);
+		if(valReturn != -1) 
+		{
+			return valReturn;	
+		}
+		  
+	  }
+	  return -1;
   }
   
   private int playVertical(int j) 
@@ -173,7 +280,8 @@ public class MyAgent extends Agent {
    *
    * @return the column that would allow the opponent to win.
    */
-  public int theyCanWin() {  
+  public int theyCanWin() {
+	  iAmRed = iAmRedOg;
 		  //Check all columns and their rows for a yellow
 		  for(int j = 0; j < myGame.getColumnCount(); j++) 
 		  {
@@ -577,17 +685,24 @@ public class MyAgent extends Agent {
 			  {
 				  if(!slot(j + 3, k).getIsFilled()) 
 				  {
-					//Check if any of the empties have tiles under them to place
-					if(slot(j + 2, k + 1).getIsFilled())
+					//If they're on the ground, place on the closest one to the enemy tiles
+					  if(k == myGame.getRowCount() - 1) 
+					  {
+						  if(printMoves)
+						  {System.out.println("horizontal *Prediction* Block Ground (two-hole[here]-hole)---->");}
+						  return (j + 2);
+					  }
+					//If they're in the air check if any of the empties have tiles under them to place
+					  else if(slot(j + 2, k + 1).getIsFilled())
 				  	{
 					  	if(printMoves)
-					  	{System.out.println("horizontal *Prediction* Block (two-hole[here]-hole)---->");}
+					  	{System.out.println("horizontal *Prediction* Block Air (two-hole[here]-hole)---->");}
 					  	return (j + 2);
 				  	}
 				  	else if(slot(j + 3, k + 1).getIsFilled()) 
 				  	{
 					  	if(printMoves)
-					  	{System.out.println("horizontal *Prediction* Block (two-hole-hole[here])---->");}
+					  	{System.out.println("horizontal *Prediction* Block Air (two-hole-hole[here])---->");}
 					  	return (j + 3);
 				  	}
 				  }
@@ -601,16 +716,24 @@ public class MyAgent extends Agent {
 			  {
 				  if(!slot(j + 1, k).getIsFilled()) 
 				  {
+					//If they're on the ground, place it [here]
+					  if(k == myGame.getRowCount() - 1) 
+					  {
+						  if(printMoves)
+						  {System.out.println("horizontal *Prediction* Block Air (two-hole[here]-hole)---->");}
+						  return (j + 1);
+					  }
+					  //If they're in the air, check to see if there is a tile below to place ontop of
 					  if(slot(j + 1, k + 1).getIsFilled())
 					  {
 						  if(printMoves)
-						  {System.out.println("horizontal *Prediction* Block (hole-one-hole[here]-one)---->");}
+						  {System.out.println("horizontal *Prediction* Block Ground (hole-one-hole[here]-one)---->");}
 						  return (j + 1);  
 					  }
 					  else if(slot(j - 1, k + 1).getIsFilled())
 					  {
 						  if(printMoves)
-						  {System.out.println("horizontal *Prediction* Block (hole[here]-one-hole-one)---->");}
+						  {System.out.println("horizontal *Prediction* Block Ground (hole[here]-one-hole-one)---->");}
 						  return (j - 1);  
 					  }		
 				  }
@@ -623,17 +746,24 @@ public class MyAgent extends Agent {
 			  {
 				  if(!slot(j + 3, k).getIsFilled()) 
 				  {
-					  //Check if any of the empties have tiles under them to place
+					//If they're on the ground, place on the closest one to the enemy tiles
+					  if(k == myGame.getRowCount() - 1) 
+					  {
+						  if(printMoves)
+						  {System.out.println("horizontal *Prediction* Block Ground (two-hole[here]-hole)---->");}
+						  return (j + 1);
+					  }
+					  //If they're in the air check if any of the empties have tiles under them to place
 					  if(slot(j + 1, k + 1).getIsFilled()) 
 					  {
 						  if(printMoves)
-						  {System.out.println("horizontal *Prediction* Block (one-hole[here]-one-hole)---->");}
+						  {System.out.println("horizontal *Prediction* Block Air (one-hole[here]-one-hole)---->");}
 						  return (j + 1); 
 					  }
 					  else if(slot(j + 3, k + 1).getIsFilled()) 
 					  {
 						  if(printMoves)
-						  {System.out.println("horizontal *Prediction* Block (one-hole-one-hole[here])---->");}
+						  {System.out.println("horizontal *Prediction* Block Air (one-hole-one-hole[here])---->");}
 						  return (j + 3);   
 					  }	   
 				  }
@@ -654,17 +784,24 @@ public class MyAgent extends Agent {
 			  {
 				  	if(!slot(j - 3, k).getIsFilled()) 
 				  	{
-				  		//Check if any of the empties have tiles under them to place
+				  	//If they're on the ground, place on the closest one to the enemy tiles
+						  if(k == myGame.getRowCount() - 1) 
+						  {
+							  if(printMoves)
+							  {System.out.println("horizontal *Prediction* Block Ground (two-hole[here]-hole)---->");}
+							  return (j - 2);
+						  }
+				  		//If they're in the air Check if any of the empties have tiles under them to place
 				  		if(slot(j - 2, k + 1).getIsFilled())
 				  		{
 				  			if(printMoves)
-				  			{System.out.println("horizontal *Prediction* Block (two-hole[here]-hole)<----");}
+				  			{System.out.println("horizontal *Prediction* Block Air (two-hole[here]-hole)<----");}
 				  			return (j - 2);
 				  		}
 				  		else if(slot(j - 3, k + 1).getIsFilled()) 
 				  		{
 				  			if(printMoves)
-				  			{System.out.println("horizontal *Prediction* Block (two-hole-hole[here])<----");}
+				  			{System.out.println("horizontal *Prediction* Block Air (two-hole-hole[here])<----");}
 				  			return (j - 3);
 				  		}
 				  	}
