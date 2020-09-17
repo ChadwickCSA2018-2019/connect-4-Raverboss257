@@ -560,18 +560,6 @@ public class MyAgent extends Agent {
 					  }
 				  }
 			  }
-			  
-			  //**Prediction Block**
-			  //If there is an empty slot in a potential diagonal that has a tile under it, continue
-			  if(!myGame.getColumn(j + 1).getSlot(k - 1).getIsFilled() && myGame.getColumn(j + 1).getSlot(k).getIsFilled()) 
-			  {
-				  //if the diagonal after the empty is also not the same color as MyAgent, place a column in the previous empty slot
-				  if(myGame.getColumn(j + 2).getSlot(k - 2).getIsFilled() && myGame.getColumn(j + 2).getSlot(k - 2).getIsRed() != iAmRed) 
-				  {
-					  System.out.println("Prediction BlockR ---->^");
-					  return (j + 1);
-				  }
-			  }
 		  }
 	  }
 	  return -1;
@@ -778,18 +766,6 @@ public class MyAgent extends Agent {
 						  {System.out.println("horizontal *Prediction* Block Air (one-hole-one-hole[here])---->");}
 						  return (j + 3);   
 					  }	   
-				  }
-			  }
-			  
-			  //**Prediction Block**
-			  //If there is an empty slot in a potential diagonal that has a tile under it, continue
-			  if(!myGame.getColumn(j - 1).getSlot(k - 1).getIsFilled() && myGame.getColumn(j - 1).getSlot(k).getIsFilled()) 
-			  {
-				  //if the diagonal after the empty is also not the same color as MyAgent, place a column in the previous empty slot
-				  if(myGame.getColumn(j - 2).getSlot(k - 2).getIsFilled() && myGame.getColumn(j - 2).getSlot(k - 2).getIsRed() != iAmRed) 
-				  {
-					  System.out.println("Prediction BlockL ^<----");
-					  return (j - 1);
 				  }
 			  }
 		  }
