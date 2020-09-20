@@ -1,4 +1,5 @@
 import java.util.Random;
+import java.util.ArrayList;
 /**
  * Describe your basic strategy here.
  * @author <RyBry>
@@ -245,6 +246,7 @@ public class MyAgent extends Agent {
 		{
 			return valReturn;	
 		}
+		ArrayList<Integer> randomSafeColumns = new ArrayList<Integer>();
 		for (int j = 0; j < myGame.getColumnCount(); j++) 
 		{
 			//Vertical Streak
@@ -253,6 +255,13 @@ public class MyAgent extends Agent {
 			{
 				return valReturn;	
 			}
+			else 
+			{
+				//if no strategic move was found in this column that was not blacklisted
+				//then add it to a list that is safe for random moves this round
+				randomSafeColumns.add(j);
+			}
+
 		}
 		return -1;
 	}
@@ -308,7 +317,6 @@ public class MyAgent extends Agent {
 		{
 			for(int k = 0; k < myGame.getColumn(j).getRowCount(); k++) 
 			{
-
 				//If an opposite tile is found, run the checks
 				if(slot(j, k).getIsFilled() && slot(j, k).getIsRed() != iAmRed) 
 				{
@@ -356,6 +364,7 @@ public class MyAgent extends Agent {
 					{return valReturn;}
 				}
 			}
+
 		}
 		return -1;
 	}
@@ -425,8 +434,8 @@ public class MyAgent extends Agent {
 	}
 	//****END Simple Tile Checking Methods****
 
-	
-	
+
+
 	//****Defensive Block methods****
 	//Note: the first found tile that doesn't match MyAgent is what triggers these methods
 	//so while there may appear to only be three checks, there are in fact 4 when including the trigger check
@@ -592,9 +601,6 @@ public class MyAgent extends Agent {
 
 	private int horzBlockR(int j, int k) 
 	{
-		Connect4Slot token2;
-		Connect4Slot token3;
-		Connect4Slot tokenHole;
 		//Check Restrictions first
 		if(j < myGame.getColumnCount() - 3)
 		{
@@ -669,9 +675,9 @@ public class MyAgent extends Agent {
 		return -1;
 	}
 	//****END Defensive Block methods****
-	
-	
-	
+
+
+
 
 	//****Prediction Block methods****
 	private int vertPredict(int j) 
@@ -696,24 +702,8 @@ public class MyAgent extends Agent {
 	private int horzPredictR(int j, int k)
 	{
 		//Check Restrictions first
-		//this won't work on the ground level
 		if(j < myGame.getColumnCount() -3) 
 		{
-			//(Found one, hole, found two)
-			token2 = slot(j+2, k);
-			token3 = slot(j+3, k);
-			tokenHole = slot(j+1, k);			
-			if(patternMatchesBlock(token2, token3, tokenHole))
-			{
-				//Check if there is a token below tokenHole
-				if(isTokenBelow(j+1, k)) 
-				{
-					if(printMoves)
-					{System.out.println("Horz Block (one-hole-two) --->																THIS IS NEW");}
-					return (j+1);
-				}
-			}
-
 			//(found two, hole*2)
 			token2 = slot(j+1, k);
 			tokenHole = slot(j+2, k);
